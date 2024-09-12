@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ma Guidance</title>
+    <link rel="stylesheet" href="static/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.botpress.cloud/webchat/v2.1/inject.js"></script>
+    <script src="https://mediafiles.botpress.cloud/bcf46b31-d73a-4647-8ae3-2a314ea7c7db/webchat/v2.1/config.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Ma Guidance</h1>
+        <nav>
+            <ul>
+                <li><a href="#recommend">Course Recommendation</a></li>
+                <!-- <li><a href="#chatbot">Chatbot</a></li> -->
+                <li><a href="#roadmap-after10th">Roadmap After 10th</a></li>
+                <li><a href="#roadmap-after12th">Roadmap After 12th</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="recommend">
+            <h2>Course Recommendation</h2>
+            <form id="recommend-form" action="/recommend" method="POST">
+                <label for="score">Score:</label>
+                <input type="number" id="score" name="score" required>
+                
+                <label for="interests">Select Interests:</label>
+                <select id="interests" name="interests" multiple required>
+                    <option value=0>Science</option>
+                    <option value=1>Commerce</option>
+                    <option value=2>Humanities</option>
+                    <!-- Add more options as needed -->
+                </select>
+                
+                <button type="submit">Get Recommendations</button>
+            </form>
+            <div id="recommendations"></div>
+        </section>        
+
+        <!-- <section id="chatbot">
+            <h2>Chatbot</h2>
+            <form id="chatbot-form">
+                <label for="query">Ask a question:</label>
+                <input type="text" id="query" name="query" required>
+                
+                <button type="submit">Get Response</button>
+            </form>
+            <div id="chatbot-response"></div>
+        </section> -->
+
+        <section id="roadmap-after10th">
+            <h2>Roadmap After 10th</h2>
+            <form id="roadmap-after10th-form">
+                <label>Select Interests:</label>
+                <select id="interests" name="interests" multiple>
+                    <option value="Science">Science</option>
+                    <option value="Commerce">Commerce</option>
+                    <option value="Humanities">Humanities</option>
+                </select>
+                
+                <button type="submit">Get Roadmaps</button>
+            </form>
+            <div id="roadmap-after10th-results"></div>
+        </section>
+
+        <section id="roadmap-after12th">
+            <h2>Roadmap After 12th</h2>
+            <form id="roadmap-after12th-form">
+                <label for="stream">Stream:</label>
+                <select id="stream" name="stream">
+                    <option value="Science">Science</option>
+                    <option value="Commerce">Commerce</option>
+                    <option value="Humanities">Humanities</option>
+                </select>
+                
+                <button type="submit">Get Roadmap</button>
+            </form>
+            <div id="roadmap-after12th-results"></div>
+        </section>
+    </main>
+
+    <script>
+        $(document).ready(function() {
+            // Handle Course Recommendation
+            $('#recommend-form').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '/recommend',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        console.log(response);
+                        $('#recommendations').html(response.recommendations.join('<br>'));
+                    },
+                    error: function() {
+                        $('#recommendations').html('<p>An error occurred. Please try again.</p>');
+                    }
+                });
+            });
+
+            // Handle Chatbot
+            // $('#chatbot-form').submit(function(e) {
+            //     e.preventDefault();
+            //     $.ajax({
+            //         type: 'POST',
+            //         url: '/chatbot',
+            //         data: $(this).serialize(),
+            //         success: function(response) {
+            //             $('#chatbot-response').text(response.response);
+            //         },
+            //         error: function() {
+            //             $('#chatbot-response').html('<p>An error occurred. Please try again.</p>');
+            //         }
+            //     });
+            // });
+
+            // Handle Roadmap After 10th
+            $('#roadmap-after10th-form').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '/roadmap/after10th',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        let results = '<h4>Recommendations:</h4>';
+                        $.each(response.roadmaps, function(key, roadmap) {
+                            results += `<h5>${key}</h5>`;
+                            results += `<p>${roadmap.description}</p>`;
+                            results += '<ul>';
+                            $.each(roadmap.courses, function(index, course) {
+                                results += `<li><strong>${course.name}:</strong> ${course.details}</li>`;
+                            });
+                            results += '</ul>';
+                            results += `<p><strong>Career Options:</strong> ${roadmap.career_options.join(', ')}</p>`;
+                        });
+                        $('#roadmap-after10th-results').html(results);
+                    },
+                    error: function() {
+                        $('#roadmap-after10th-results').html('<p>An error occurred. Please try again.</p>');
+                    }
+                });
+            });
+
+            // Handle Roadmap After 12th
+            $('#roadmap-after12th-form').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '/roadmap/after12th',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        let results = '<h4>Recommendations:</h4>';
+                        results += `<h5>${response.roadmaps.description}</h5>`;
+                        results += '<ul>';
+                        $.each(response.roadmaps.courses, function(index, course) {
+                            results += `<li><strong>${course.name}:</strong> ${course.details}</li>`;
+                        });
+                        results += '</ul>';
+                        results += `<p><strong>Career Options:</strong> ${response.roadmaps.career_options.join(', ')}</p>`;
+                        $('#roadmap-after12th-results').html(results);
+                    },
+                    error: function() {
+                        $('#roadmap-after12th-results').html('<p>An error occurred. Please try again.</p>');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

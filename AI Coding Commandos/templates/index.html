@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal Aid System</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1>Submit Your Complaint</h1>
+    <form id="complaint-form">
+        <textarea id="complaint" placeholder="Describe your issue..." rows="5" cols="50"></textarea><br>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="response"></div>
+    <script>
+        document.getElementById('complaint-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const complaint = document.getElementById('complaint').value;
+
+            // Clear previous response
+            document.getElementById('response').innerText = '';
+
+            fetch('/submit_complaint', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ complaint })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let responseText = '';
+                if (data.error) {
+                    responseText = 'Error: ' + data.error;
+                } else {
+                    responseText = 
+                        'Response: ' + data.triage_response + '\n' +
+                        'Document: ' + data.generated_document + '\n' +
+                        'Complaint ID: ' + data.complaint_id;
+                }
+                // Display the response
+                document.getElementById('response').innerText = responseText;
+            })
+            .catch(error => {
+                document.getElementById('response').innerText = 'Network error: ' + error.message;
+            });
+        });
+    </script>
+</body>
+</html>
